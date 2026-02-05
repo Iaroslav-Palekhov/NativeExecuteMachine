@@ -1,0 +1,74 @@
+start:
+    ds operator ""
+    go calc
+end
+
+.block calc:
+
+    out
+
+    out "введите оператор: (+, -, /, *,  q - exit): "
+    inp operator
+
+    cmp operator "q"
+    ife go exit
+
+    out "введите первое число: "
+    inp r1
+
+    out "введите второе число: "
+    inp r2
+
+    cmp operator "+"
+    ife go plus
+
+    cmp operator "-"
+    ife go minus
+
+    cmp operator "/"
+    ife go divv
+
+    cmp operator "*"
+    ife go multi
+
+    ifn go calc 
+
+    go calc
+end
+
+.block plus:
+    add r1 r2
+    go output
+end
+
+.block minus:
+    sub r1 r2
+    go output
+end
+
+.block divv:
+    div r1 r2
+    go output
+end
+
+.block multi:
+    mul r1 r2
+    go output
+end
+
+.block exit:
+    out "досвидания"
+    next
+end
+
+.block output:
+    out "Ответ: "
+    out r1
+    next
+    go calc
+end
+
+stop:
+    clear registres
+    clear operator
+end

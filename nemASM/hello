@@ -1,0 +1,15 @@
+start:
+    ds operator ""
+    go main
+end
+
+.block main:
+
+    inp operator
+    out r1
+end
+
+stop:
+    clear registres
+    clear operator
+end
