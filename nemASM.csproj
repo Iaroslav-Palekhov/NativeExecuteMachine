@@ -14,7 +14,6 @@
     <TieredCompilation>false</TieredCompilation>
     <ReadyToRun>true</ReadyToRun>
     <ReadyToRunComposite>true</ReadyToRunComposite>
-    <IlcInstructionSet>native</IlcInstructionSet>
     <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
     <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
     <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
