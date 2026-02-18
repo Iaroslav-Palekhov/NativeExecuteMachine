@@ -1,9 +1,12 @@
 __start:
-    out "автор - арслан", 2
-    out "Введите размер поля: ", 0
+    out "made by arslan", 2
+    out "Введите размер поля(0 - выход из игры): ", 0
 
     db event, 0
     inp r1
+    cmp r1, 0
+    ife go __stop
+
     db size, r1
     arrb arr, size
 
@@ -16,8 +19,12 @@ __start:
     mov r2, 0
     call print_arr
 
-    out "Введите номер числа(не индекс): ", 0
+    out "Введите номер числа(не индекс, 0 - выход из игры): ", 0
     inp r1
+
+    cmp r1, 0
+    ife go __stop
+
     mov event, r1
 
     cmp event, 1
