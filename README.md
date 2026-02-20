@@ -3,7 +3,7 @@
 
 Запись всей разработки - https://www.youtube.com/playlist?list=PL7lwZv4fhGCbd4QIZXwvMrdQQru8_7TJH
 
-## Версия 1.1
+## Версия 1.2
 
 Стабильный релиз.
 
