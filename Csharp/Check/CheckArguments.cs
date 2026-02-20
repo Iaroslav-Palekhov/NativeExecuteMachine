@@ -130,7 +130,7 @@ struct CheckArguments{
 
         else if (CheckArgToVector("arg1")) // ПРОВЕРЯЕМ АРГУМЕНТ НА КООРДИНАТУ ВЕКТОРА
             return;
-        
+    
 
         else if (arg1.Contains('[') && arg1.Contains(']')){ // если первый аргумент это элемент массива
             if (arg1.Contains('*')){ // если массив двумерный
