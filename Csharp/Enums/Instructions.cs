@@ -39,6 +39,12 @@ public enum Instructions{
     _push,
     _popa,
     _pusha,
-    _len
+    _len,
+    _fwrite,
+    _fread,
+    _fapp,
+    _httpget,
+    _httppost,
+    _httpserve
 
 }

@@ -71,6 +71,14 @@ struct Executer{
         {"popa", () => OStack.Execute(_popa)},
         {"push", () => OStack.Execute(_push)},
         {"pusha", () => OStack.Execute(_pusha)},
+        
+        //27.02.2026 Добавлено разработчиком Iaroslav-Palekhov
+        {"fwrite", () => FileIO.ExecuteWrite(false)},
+        {"fapp",   () => FileIO.ExecuteWrite(true)},
+        {"fread",     () => FileIO.ExecuteRead()},
+        {"httpget",   () => FileIO.ExecuteHttpGet()},
+        {"httppost",  () => FileIO.ExecuteHttpPost()},
+        {"httpserve", () => FileIO.ExecuteHttpServe()},
         {"hlt", () => ExecuteHalt()},
         // matrix3 - массив 3д
         // matrix4 - массив 4д
@@ -93,7 +101,7 @@ struct Executer{
     }
 
     static void CheckTypeAndConvertValue(){ // проверяем, какой тип у 1 аргумента и конвертируем в этот тип готовое значение (2 аргумент).
-        if (opcode == "pusha" || opcode == "popa" || opcode == "pop" || opcode == "push" || opcode == "inp" || opcode == "clear" || opcode == "lng" || opcode == "lngsq" || opcode == "max" || opcode == "min" || opcode == "len" || opcode == "srt" || opcode == "mx2_s" || opcode == "mx2_q" || opcode == "rss") 
+        if (opcode == "pusha" || opcode == "popa" || opcode == "pop" || opcode == "push" || opcode == "inp" || opcode == "clear" || opcode == "lng" || opcode == "lngsq" || opcode == "max" || opcode == "min" || opcode == "len" || opcode == "srt" || opcode == "mx2_s" || opcode == "mx2_q" || opcode == "rss" || opcode == "fwrite" || opcode == "fapp" || opcode == "fread" || opcode == "httpget" || opcode == "httppost" || opcode == "httpserve") 
             return;
             
         switch (typeArg1){

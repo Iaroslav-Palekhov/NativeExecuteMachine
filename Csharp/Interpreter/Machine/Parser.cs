@@ -100,21 +100,45 @@ struct Parser
 
             StringBuilder txt = new StringBuilder();
             bool commaRemove = false;   // запятая пропущена?
+            bool inString = false;      // внутри кавычек?
+            char prevCh = '\0';
             foreach (char ch in line){
-                if (ch == ';'){
+                if (ch == ';' && !inString){
                     break;
                 }
                 if ((ch == ',' || ch == '\"') && commaRemove == false){
                     if (ch == '\"'){
                         txt.Append(ch);
-                        commaRemove = true; 
+                        commaRemove = true;
+                        inString = true;
+                        prevCh = ch;
                         continue;
                     }
                     commaRemove = true;
+                    prevCh = ch;
                     continue;
                 } else {
+                    // обрабатываем escape внутри строк
+
+                    // 27.02.2026 Добавлено разработчиком Iaroslav-Palekhov
+                    if (inString && prevCh == '\\'){
+                        txt.Remove(txt.Length - 1, 1); // убираем backslash
+                        switch (ch){
+                            case 'n':  txt.Append('\n'); break;
+                            case 't':  txt.Append('\t'); break;
+                            case 'r':  txt.Append('\r'); break;
+                            case '\\': txt.Append('\\'); break;
+                            default:   txt.Append('\\'); txt.Append(ch); break;
+                        }
+                        prevCh = ch;
+                        continue;
+                    }
+                    if (ch == '\"' && inString){
+                        inString = false;
+                    }
                     txt.Append(ch);
                 }
+                prevCh = ch;
             }
 
             codeParts.Add(numberLine, txt.ToString().Trim());
@@ -150,8 +174,8 @@ struct Parser
                     CheckArguments.Run(parts[0], null, null, line);
 
             }
-        } catch {
-            Console.Error.WriteLine($"Unhandled error! LineCode: < {codeParts[numberLine - 1]} >");
+        } catch (Exception __ex) {
+            Console.Error.WriteLine($"Unhandled error! LineCode: < {codeParts[numberLine - 1]} > Exception: {__ex.GetType().Name}: {__ex.Message}");
             return;
         }
 

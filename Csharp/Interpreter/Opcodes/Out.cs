@@ -9,7 +9,7 @@ struct Out{
     public static void Execute(){ 
         
         if (nameVars.Contains(value)){
-            ExecuteShowArr();
+            ExecuteShowVar();
             return;
         }
 
@@ -18,7 +18,7 @@ struct Out{
             return;
         }
 
-        Console.Write($"{value}");
+        Console.Write(Unescape(value));
 
         while (xnum > 0){
             Console.Write('\n');
@@ -26,13 +26,31 @@ struct Out{
         }
     }
 
+    public static void ExecuteShowVar(){
+        // Строковая переменная (ds) — выводим напрямую
+        if (stringVars.ContainsKey(value)){
+            Console.Write(value: stringVars[value]);
+            return;
+        }
+
+        // Числовые переменные — выводим значение
+        if (byteVars.ContainsKey(value)){   Console.Write(byteVars[value]);   return; }
+        if (shortVars.ContainsKey(value)){  Console.Write(shortVars[value]);  return; }
+        if (floatVars.ContainsKey(value)){  Console.Write(floatVars[value]);  return; }
+        if (doubleVars.ContainsKey(value)){ Console.Write(doubleVars[value]); return; }
+
+        // Массивы и матрицы
+        ExecuteShowArr();
+    }
+
     public static void ExecuteShowArr(){ // если на вывод дается массив или матрица
         StringBuilder txt = new StringBuilder(10000);
 
-        string n1 = parts[^1].Replace('*', ' ').Split()[1];
+        string n1 = parts[^1].Replace('*', ' ').Split()[0];
 
         if (Matrix2_s.ContainsKey(value) || Matrix2_q.ContainsKey(value)){
-            string n2 = parts[^1].Replace('*', ' ').Split()[0];
+            string[] mparts = parts[^1].Replace('*', ' ').Split();
+            string n2 = mparts.Length > 1 ? mparts[1] : "0";
             if (!int.TryParse(n2, out ynum)){
                 Errors.Print(0x02); 
                 return;
@@ -102,7 +120,25 @@ struct Out{
         }
 
         Console.Write(txt);
+    }
 
+    private static string Unescape(string s){
+        StringBuilder sb = new StringBuilder(s.Length);
+        int i = 0;
+        while (i < s.Length){
+            if (s[i] == '\\' && i + 1 < s.Length){
+                switch (s[i + 1]){
+                    case 'n':  sb.Append('\n'); i += 2; continue;
+                    case 't':  sb.Append('\t'); i += 2; continue;
+                    case 'r':  sb.Append('\r'); i += 2; continue;
+                    case '\\': sb.Append('\\'); i += 2; continue;
+                    case '\'': sb.Append('\''); i += 2; continue;
+                    case '0':  sb.Append('\0'); i += 2; continue;
+                }
+            }
+            sb.Append(s[i]);
+            i++;
+        }
+        return sb.ToString();
     }
 }
-

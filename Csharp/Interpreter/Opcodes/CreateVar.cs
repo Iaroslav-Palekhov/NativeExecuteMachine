@@ -30,11 +30,33 @@ struct CreateVar{
                 RAM += 8; 
                 return;
             }
-            case _string:{ 
-                stringVars.Add(nameArg1, value); 
-                RAM += value.Length; 
+            case _string:{
+                string s = Unescape(value);
+                stringVars.Add(nameArg1, s); 
+                RAM += s.Length; 
                 return;
             }
         }
+    }
+
+    // Конвертируем \n \t \r \\ в реальные символы
+    private static string Unescape(string s){
+        System.Text.StringBuilder sb = new System.Text.StringBuilder(s.Length);
+        int i = 0;
+        while (i < s.Length){
+            if (s[i] == '\\' && i + 1 < s.Length){
+                switch (s[i + 1]){
+                    case 'n':  sb.Append('\n'); i += 2; continue;
+                    case 't':  sb.Append('\t'); i += 2; continue;
+                    case 'r':  sb.Append('\r'); i += 2; continue;
+                    case '\\': sb.Append('\\'); i += 2; continue;
+                    case '\'': sb.Append('\''); i += 2; continue;
+                    case '0':  sb.Append('\0'); i += 2; continue;
+                }
+            }
+            sb.Append(s[i]);
+            i++;
+        }
+        return sb.ToString();
     }
 }

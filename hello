@@ -1,0 +1,15 @@
+__start:
+    go main
+
+.p main:
+    out "welcome to hell", 1
+	ds line1 "Hello, world!"
+	ds line2 "Second line"
+
+	fwrite "output.txt" line1   ; создаёт файл: Hello, world!
+	fapp   "output.txt" line2   ; дописывает новой строкой: Second line
+	
+	httpserve "8080" "www"
+
+__stop:
+    clear registres

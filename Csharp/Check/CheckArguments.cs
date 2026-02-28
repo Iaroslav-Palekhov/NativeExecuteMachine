@@ -103,7 +103,46 @@ struct CheckArguments{
             case "pusha":{
                 break;
             }
+            case "fwrite":
+            case "fapp":{
+                // fwrite "filepath" varname — путь в кавычках, переменная последним словом
+                GetFilePathToArg1();
+                Argument2 = parts[^1]; // последнее слово = имя переменной
+                break;
+            }
+            case "fread":
+            case "httpget":
+            case "httppost":{
+                nameArg1 = arg1;
+                typeArg1 = Types._string;
+                GetFilePathToArg2();
+                break;
+            }
+            case "httpserve":{
+                // httpserve "port" "webroot"
+                GetFilePathToArg1();
+                GetFilePathToArg2();
+                break;
+            }
         }
+    }
+
+    private static void GetFilePathToArg1(){
+        int first  = line.IndexOf('"');
+        int second = line.IndexOf('"', first + 1);
+        if (first >= 0 && second > first)
+            nameArg1 = line.Substring(first + 1, second - first - 1);
+        else
+            nameArg1 = arg1;
+    }
+
+    private static void GetFilePathToArg2(){
+        int last   = line.LastIndexOf('"');
+        int before = last > 0 ? line.LastIndexOf('"', last - 1) : -1;
+        if (before >= 0 && last > before)
+            Argument2 = line.Substring(before + 1, last - before - 1);
+        else
+            Argument2 = arg2 ?? "";
     }
 
     private static void GetValueToArg1(){
@@ -234,7 +273,7 @@ struct CheckArguments{
             }
         }
         if (isAstring == true){ // если переменная является строкой
-            Argument2 = tempText.ToString();
+            Argument2 = UnescapeString(tempText.ToString());
             currentType = Types._string;
             return;
         } else {
@@ -411,5 +450,25 @@ struct CheckArguments{
             return;
         }
 
+    }
+    private static string UnescapeString(string s){
+        // Обрабатываем escape-последовательности: \n, \t, \r, \\, \'
+        System.Text.StringBuilder sb = new System.Text.StringBuilder(s.Length);
+        int i = 0;
+        while (i < s.Length){
+            if (s[i] == '\\' && i + 1 < s.Length){
+                switch (s[i + 1]){
+                    case 'n':  sb.Append('\n'); i += 2; continue;
+                    case 't':  sb.Append('\t'); i += 2; continue;
+                    case 'r':  sb.Append('\r'); i += 2; continue;
+                    case '\\': sb.Append('\\'); i += 2; continue;
+                    case '\'':  sb.Append('\''); i += 2; continue;
+                    case '0':  sb.Append('\0'); i += 2; continue;
+                }
+            }
+            sb.Append(s[i]);
+            i++;
+        }
+        return sb.ToString();
     }
 }

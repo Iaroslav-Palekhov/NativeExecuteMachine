@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>nemASM — Auth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07070d;--surface:#0e0e1a;--border:#1a1a2e;
+      --accent:#6d28d9;--accent2:#8b5cf6;--glow:rgba(109,40,217,.3);
+      --text:#e2e8f0;--muted:#64748b;--err:#f87171;--ok:#4ade80;
+    }
+    body{
+      font-family:'Manrope',sans-serif;background:var(--bg);
+      color:var(--text);min-height:100vh;display:flex;
+      align-items:center;justify-content:center;overflow:hidden;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% -5%,rgba(109,40,217,.2) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 105%,rgba(139,92,246,.15) 0%,transparent 60%);
+    }
+    body::after{
+      content:'';position:fixed;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(109,40,217,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(109,40,217,.03) 1px,transparent 1px);
+      background-size:44px 44px;
+    }
+    .wrap{position:relative;z-index:10;width:100%;max-width:420px;padding:20px;animation:up .55s ease}
+    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+    .logo{text-align:center;margin-bottom:32px}
+    .logo h1{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:900;
+      background:linear-gradient(130deg,#8b5cf6,#6d28d9,#a78bfa);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px}
+    .logo p{color:var(--muted);font-size:12px;margin-top:5px}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+      padding:32px 28px;box-shadow:0 0 50px rgba(109,40,217,.07),0 20px 50px rgba(0,0,0,.55);position:relative;overflow:hidden}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.4}
+
+    .tabs{display:flex;background:var(--bg);border-radius:10px;padding:4px;
+      margin-bottom:26px;border:1px solid var(--border)}
+    .tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:600;
+      font-family:'Manrope',sans-serif;cursor:pointer;border-radius:8px;
+      color:var(--muted);transition:all .22s;border:none;background:transparent;letter-spacing:.3px}
+    .tab.on{background:var(--accent);color:#fff;box-shadow:0 0 18px var(--glow)}
+
+    .form{display:none}.form.on{display:block;animation:si .28s ease}
+    @keyframes si{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+
+    .field{margin-bottom:16px}
+    label{display:block;font-size:11px;font-weight:600;color:var(--muted);
+      margin-bottom:7px;text-transform:uppercase;letter-spacing:.7px}
+    input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;
+      padding:12px 15px;font-family:'Manrope',sans-serif;font-size:14px;
+      color:var(--text);outline:none;transition:all .18s}
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+    input::placeholder{color:var(--muted)}
+
+    .btn{width:100%;padding:13px;border:none;border-radius:9px;
+      font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;
+      letter-spacing:.4px;cursor:pointer;
+      background:linear-gradient(130deg,var(--accent),var(--accent2));
+      color:#fff;margin-top:6px;transition:all .22s;position:relative;overflow:hidden}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px var(--glow)}
+    .btn:active{transform:translateY(0)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    .msg{font-size:13px;padding:11px 13px;border-radius:8px;margin-top:14px;
+      display:none;font-weight:500;animation:up .2s ease}
+    .msg.err{display:block;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--err)}
+    .msg.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:var(--ok)}
+
+    /* Dashboard */
+    #dash{display:none;animation:up .45s ease}
+    .dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+    .dh h2{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;
+      background:linear-gradient(130deg,#8b5cf6,#a78bfa);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text}
+    .out-btn{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.22);
+      color:var(--err);padding:7px 14px;border-radius:7px;
+      font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+    .out-btn:hover{background:rgba(248,113,113,.18)}
+
+    .ucard{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px}
+    .ava{width:52px;height:52px;border-radius:12px;
+      background:linear-gradient(130deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Unbounded',sans-serif;font-size:20px;font-weight:900;
+      margin-bottom:12px;box-shadow:0 4px 18px var(--glow)}
+    .uname{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;margin-bottom:3px}
+    .uemail{color:var(--muted);font-size:12px}
+
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .stat{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px}
+    .sv{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700;color:var(--accent2)}
+    .sl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+    .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);
+      border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Авторизация -->
+  <div id="auth">
+    <div class="logo">
+      <h1>nemASM</h1>
+      <p>Система авторизации · db.json backend</p>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab on" onclick="tab('login')">Вход</button>
+        <button class="tab"   onclick="tab('reg')">Регистрация</button>
+      </div>
+
+      <!-- Вход -->
+      <div class="form on" id="loginF">
+        <div class="field"><label>Логин</label>
+          <input id="lUser" placeholder="Введи логин"/></div>
+        <div class="field"><label>Пароль</label>
+          <input id="lPass" type="password" placeholder="Введи пароль"/></div>
+        <button class="btn" id="lBtn" onclick="login()">ВОЙТИ</button>
+        <div class="msg" id="lMsg"></div>
+      </div>
+
+      <!-- Регистрация -->
+      <div class="form" id="regF">
+        <div class="field"><label>Логин</label>
+          <input id="rUser" placeholder="Придумай логин"/></div>
+        <div class="field"><label>Email</label>
+          <input id="rEmail" type="email" placeholder="Введи email"/></div>
+        <div class="field"><label>Пароль</label>
+          <input id="rPass" type="password" placeholder="Минимум 6 символов"/></div>
+        <div class="field"><label>Повтори пароль</label>
+          <input id="rPass2" type="password" placeholder="Повтори пароль"/></div>
+        <button class="btn" id="rBtn" onclick="register()">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        <div class="msg" id="rMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Личный кабинет -->
+  <div id="dash">
+    <div class="card">
+      <div class="dh">
+        <h2>КАБИНЕТ</h2>
+        <button class="out-btn" onclick="logout()">Выйти</button>
+      </div>
+      <div class="ucard">
+        <div class="ava" id="dAva">?</div>
+        <div class="uname" id="dName">—</div>
+        <div class="uemail" id="dEmail">—</div>
+        <div class="stats">
+          <div class="stat"><div class="sv" id="dTotal">0</div><div class="sl">Пользователей</div></div>
+          <div class="stat"><div class="sv" id="dTime">—</div><div class="sl">Вошёл в</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const API = '';   // пустой — запросы идут на тот же хост:порт
+
+  // ── Хелперы ──────────────────────────────────────────
+  async function api(method, path, body){
+    const opts = { method, headers:{'Content-Type':'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(API + path, opts);
+    return r.json();
+  }
+
+  function msg(id, text, type){ 
+    const el = document.getElementById(id);
+    el.className = 'msg ' + type; 
+    el.textContent = text;
+  }
+  function clearMsg(id){ const el=document.getElementById(id); el.className='msg'; el.textContent=''; }
+
+  function setLoading(btnId, loading){
+    const b = document.getElementById(btnId);
+    b.disabled = loading;
+    b.innerHTML = loading ? '<span class="spin"></span>Загрузка...' : b.dataset.label;
+  }
+
+  // сохраняем label кнопок
+  ['lBtn','rBtn'].forEach(id=>{
+    const b = document.getElementById(id);
+    b.dataset.label = b.textContent;
+  });
+
+  // ── Вкладки ──────────────────────────────────────────
+  let curTab = 'login';
+  function tab(t){
+    curTab = t;
+    document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='reg')));
+    document.getElementById('loginF').classList.toggle('on', t==='login');
+    document.getElementById('regF').classList.toggle('on', t==='reg');
+    clearMsg('lMsg'); clearMsg('rMsg');
+  }
+
+  // ── Регистрация ───────────────────────────────────────
+  async function register(){
+    const username = document.getElementById('rUser').value.trim();
+    const email    = document.getElementById('rEmail').value.trim();
+    const pass     = document.getElementById('rPass').value;
+    const pass2    = document.getElementById('rPass2').value;
+
+    if (!username||!email||!pass) return msg('rMsg','⚠️ Заполни все поля','err');
+    if (pass !== pass2)           return msg('rMsg','⚠️ Пароли не совпадают','err');
+
+    setLoading('rBtn', true);
+    try {
+      // POST /api/register
+      const res = await api('POST','/api/register',{username,email,password:pass});
+      if (res.ok){
+        msg('rMsg','✅ ' + res.message,'ok');
+        setTimeout(()=>tab('login'), 1400);
+      } else {
+        msg('rMsg','❌ ' + res.error,'err');
+      }
+    } catch(e){ msg('rMsg','❌ Сервер недоступен','err'); }
+    setLoading('rBtn', false);
+  }
+
+  // ── Вход ─────────────────────────────────────────────
+  async function login(){
+    const username = document.getElementById('lUser').value.trim();
+    const pass     = document.getElementById('lPass').value;
+
+    if (!username||!pass) return msg('lMsg','⚠️ Введи логин и пароль','err');
+
+    setLoading('lBtn', true);
+    try {
+      // POST /api/login
+      const res = await api('POST','/api/login',{username,password:pass});
+      if (res.ok){
+        msg('lMsg','✅ ' + res.message,'ok');
+        setTimeout(()=>showDash(res), 600);
+      } else {
+        msg('lMsg','❌ ' + res.error,'err');
+      }
+    } catch(e){ msg('lMsg','❌ Сервер недоступен','err'); }
+    setLoading('lBtn', false);
+  }
+
+  // ── Дашборд ──────────────────────────────────────────
+  async function showDash(user){
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+
+    document.getElementById('dAva').textContent   = user.username[0].toUpperCase();
+    document.getElementById('dName').textContent  = user.username;
+    document.getElementById('dEmail').textContent = user.email || '—';
+
+    const now = new Date();
+    document.getElementById('dTime').textContent =
+      now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+
+    // GET /api/users — получаем кол-во пользователей
+    try {
+      const res = await api('GET','/api/users');
+      if (res.ok) document.getElementById('dTotal').textContent = res.count;
+    } catch {}
+
+    sessionStorage.setItem('user', JSON.stringify(user));
+  }
+
+  function logout(){
+    sessionStorage.removeItem('user');
+    document.getElementById('auth').style.display = 'block';
+    document.getElementById('dash').style.display = 'none';
+    document.getElementById('lUser').value = '';
+    document.getElementById('lPass').value = '';
+    clearMsg('lMsg');
+  }
+
+  // Авто-восстановление сессии
+  const saved = sessionStorage.getItem('user');
+  if (saved) showDash(JSON.parse(saved));
+
+  // Enter
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      if (document.getElementById('dash').style.display === 'block') return;
+      curTab === 'login' ? login() : register();
+    }
+  });
+</script>
+</body>
+</html>

@@ -33,7 +33,7 @@ struct Change{
                     case _short: shortVars[nameArg1] = shortValue; return;
                     case _float: floatVars[nameArg1] = floatValue; return;
                     case _double: doubleVars[nameArg1] = doubleValue; return;
-                    case _string: RAM -= stringVars[nameArg1].Length; stringVars[nameArg1] = value; RAM += value.Length; return;
+                    case _string: { string _s = Unescape(value); RAM -= stringVars[nameArg1].Length; stringVars[nameArg1] = _s; RAM += _s.Length; return; }
                     case _byteARR: byteArrs[nameArg1][elementNumArg1 ?? 0] = byteValue; return;
                     case _shortARR: shortArrs[nameArg1][elementNumArg1 ?? 0] = shortValue; return;
                     case _floatARR: floatArrs[nameArg1][elementNumArg1 ?? 0] = floatValue; return;
@@ -51,7 +51,7 @@ struct Change{
                     case _short: shortVars[nameArg1] += shortValue; return;
                     case _float: floatVars[nameArg1] += floatValue; return;
                     case _double: doubleVars[nameArg1] += doubleValue; return;
-                    case _string: stringVars[nameArg1] += value; RAM += value.Length; return;
+                    case _string: { string _s = Unescape(value); stringVars[nameArg1] += _s; RAM += _s.Length; return; }
                     case _byteARR: byteArrs[nameArg1][elementNumArg1 ?? 0] += byteValue; return;
                     case _shortARR: shortArrs[nameArg1][elementNumArg1 ?? 0] += shortValue; return;
                     case _floatARR: floatArrs[nameArg1][elementNumArg1 ?? 0] += floatValue; return;
@@ -346,5 +346,24 @@ struct Change{
             matrix[iRow, iCol] = matrix[jRow, jCol];
             matrix[jRow, jCol] = temp;
         }
+    }
+    private static string Unescape(string s){
+        System.Text.StringBuilder sb = new System.Text.StringBuilder(s.Length);
+        int i = 0;
+        while (i < s.Length){
+            if (s[i] == '\\' && i + 1 < s.Length){
+                switch (s[i + 1]){
+                    case 'n':  sb.Append('\n'); i += 2; continue;
+                    case 't':  sb.Append('\t'); i += 2; continue;
+                    case 'r':  sb.Append('\r'); i += 2; continue;
+                    case '\\': sb.Append('\\'); i += 2; continue;
+                    case '\'':  sb.Append('\''); i += 2; continue;
+                    case '0':  sb.Append('\0'); i += 2; continue;
+                }
+            }
+            sb.Append(s[i]);
+            i++;
+        }
+        return sb.ToString();
     }
 }
